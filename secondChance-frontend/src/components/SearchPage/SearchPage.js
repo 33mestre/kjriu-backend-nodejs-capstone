@@ -7,6 +7,7 @@ function SearchPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [ageRange, setAgeRange] = useState(6); // Initialize with minimum value
     const [searchResults, setSearchResults] = useState([]);
+    //Task 1: Define state variables for the search query, age range, and search results.
     const categories = ['Living', 'Bedroom', 'Bathroom', 'Kitchen', 'Office'];
     const conditions = ['New', 'Like New', 'Older'];
 
@@ -54,9 +55,11 @@ function SearchPage() {
         }
     };
 
+    // Task 2. Fetch search results from the API based on user inputs.
     const navigate = useNavigate();
 
     const goToDetailsPage = (productId) => {
+        // Task 6. Enable navigation to the details page of a selected gift.
         navigate(`/app/product/${productId}`);
     };
 
@@ -70,6 +73,7 @@ function SearchPage() {
                     <div className="filter-section mb-3 p-3 border rounded">
                         <h5>Filters</h5>
                         <div className="d-flex flex-column">
+                            {/* Task 3: Dynamically generate category and condition dropdown options.*/}
                             {/* Category Dropdown */}
                             <label htmlFor="categorySelect">Category</label>
                             <select id="categorySelect" className="form-control my-1">
@@ -88,6 +92,7 @@ function SearchPage() {
                                 ))}
                             </select>
 
+                            {/* Task 4: Implement an age range slider and display the selected value. */}
                             {/* Age Range Slider */}
                             <label htmlFor="ageRange">Less than {ageRange} years</label>
                             <input
@@ -101,7 +106,7 @@ function SearchPage() {
                             />
                         </div>
                     </div>
-
+                    {/* Task 7: Add text input field for search criteria*/}
                     <input
                         type="text"
                         className="form-control mb-2"
@@ -109,6 +114,8 @@ function SearchPage() {
                         value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
                     />
+
+                    {/* Task 8: Implement search button with onClick event to trigger search:*/}
                     <button className="btn btn-primary" onClick={handleSearch}>Search</button>
                     <div className="search-results mt-4">
                         {searchResults.length > 0 ? (
@@ -127,8 +134,9 @@ function SearchPage() {
                                     </div>
                                 </div>
                             ))
-                        ) : (
-                            <div className="alert alert-info" role="alert">
+                            ) : (
+                                <div className="alert alert-info" role="alert">
+                                {/*Task 5: Display search results and handle empty results with a message. */}
                                 No products found. Please revise your filters.
                             </div>
                         )}

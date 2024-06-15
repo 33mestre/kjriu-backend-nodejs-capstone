@@ -1,47 +1,47 @@
 /* jshint esversion: 8 */
-require('dotenv').config()
-const express = require('express')
-const cors = require('cors')
-const pinoLogger = require('./logger')
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const pinoHttp = require('pino-http');
 
-const connectToDatabase = require('./models/db')
+const connectToDatabase = require('./models/db');
+const logger = require('./logger');
 
-const app = express()
-app.use('*', cors())
-const port = 3060
+const app = express();
+app.use(cors());
 
-// Connect to MongoDB; we just do this one time
+// Configuração do logger com Pino para todas as requisições
+app.use(pinoHttp({ logger }));
+
+const port = process.env.PORT || 3060;
+
+// Conexão com o MongoDB
 connectToDatabase().then(() => {
-  pinoLogger.info('Connected to DB')
-}).catch((e) => console.error('Failed to connect to DB', e))
+  logger.info('Connected to DB');
+}).catch((e) => logger.error('Failed to connect to DB', e));
 
-app.use(express.json())
+app.use(express.json());
 
-// Route files
-// Import routes
-const authRoutes = require('./routes/authRoutes') // Assuming this is correct based on other similar tasks
-const secondChanceItemsRoutes = require('./routes/secondChanceItemsRoutes') // Task 1
-const searchRoutes = require('./routes/searchRoutes') // Assuming this needs to be added as well
+// Importando rotas
+const authRoutes = require('./routes/authRoutes');
+const secondChanceItemsRoutes = require('./routes/secondChanceItemsRoutes');
+const searchRoutes = require('./routes/searchRoutes');
 
-const pinoHttp = require('pino-http')
-const logger = require('./logger')
-app.use(pinoHttp({ logger }))
+// Configurando rotas
+app.use('/api/auth', authRoutes);
+app.use('/api/secondchance/items', secondChanceItemsRoutes);
+app.use('/api/secondchance/search', searchRoutes);
 
-// Use Routes
-app.use('/api/auth', authRoutes) // Assuming this needs to be added as well
-app.use('/api/secondchance/items', secondChanceItemsRoutes) // Task 2
-app.use('/api/secondchance/search', searchRoutes) // Assuming this needs to be added as well
-
-// Global Error Handler
+// Manipulador de Erros Global
 app.use((err, req, res, next) => {
-  console.error(err)
-  res.status(500).send('Internal Server Error')
-})
+  logger.error(err);
+  res.status(500).send('Internal Server Error');
+});
 
 app.get('/', (req, res) => {
-  res.send('Inside the server')
-})
+  res.send('Inside the server');
+});
 
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`)
-})
+  logger.info(`Server running on port ${port}`);
+});

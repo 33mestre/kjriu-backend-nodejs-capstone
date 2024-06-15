@@ -105,6 +105,12 @@ celerybeat.pid
 # SageMath parsed files
 *.sage.py
 
+secondChance-backend.md
+secondChance-frontend.md
+extract.js
+extract.json
+secondChance-backend/util/lixo
+
 # Environments
 .env
 .venv

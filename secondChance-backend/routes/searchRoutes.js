@@ -1,43 +1,56 @@
+const express = require('express');
+const router = express.Router();
+const connectToDatabase = require('../models/db');
+const logger = require('../logger');
 
-const express = require('express')
-const router = express.Router()
-const connectToDatabase = require('../models/db')
-
-// Search for gifts
-router.get('/', async (req, res, next) => {
+// Search for items
+router.get('/', async (req, res) => {
     try {
-        // Task 1: Connect to MongoDB using connectToDatabase database
-        const db = await connectToDatabase() // Use await keyword and store the connection in `db`
+        // Task 1: Log the received search request with parameters
+        logger.info('Received search request with parameters:', req.query);
 
-        // Task 2: Use the collection() method to retrieve the secondChanceItems collection
-        const collection = db.collection('secondChanceItems')
+        // Task 2: Connect to MongoDB using connectToDatabase function
+        const db = await connectToDatabase();
+        logger.info('Connected to database');
 
-        // Initialize the query object
-        const query = {}
+        // Task 3: Use the collection() method to retrieve the secondChanceItems collection
+        const collection = db.collection('secondChanceItems');
+        logger.info('Accessed collection secondChanceItems');
 
-        // Add the name filter to the query if the name parameter is not empty
-        if (req.query.name && req.query.name.trim() !== '') { // Check if name parameter exists and is not empty
-            query.name = { $regex: req.query.name, $options: 'i' } // Using regex for partial match, case-insensitive
+        // Task 4: Initialize the query object
+        let query = {};
+
+        // Task 5: Add filters to query if provided
+        if (req.query.name) {
+            query.name = { $regex: req.query.name, $options: 'i' };  // case-insensitive search
+            logger.info(`Adding name filter: ${req.query.name}`);
         }
-
-        // Task 3: Add other filters to the query
         if (req.query.category) {
-            query.category = req.query.category // Directly match the category
+            query.category = req.query.category;
+            logger.info(`Adding category filter: ${req.query.category}`);
         }
         if (req.query.condition) {
-            query.condition = req.query.condition // Directly match the condition
+            query.condition = req.query.condition;
+            logger.info(`Adding condition filter: ${req.query.condition}`);
         }
         if (req.query.age_years) {
-            query.age_years = { $lte: parseInt(req.query.age_years) } // Match items with age_years less than or equal to the provided value
+            query.age_years = { $lte: parseFloat(req.query.age_years) };  // less than or equal to filter
+            logger.info(`Adding age_years filter: ${req.query.age_years}`);
         }
 
-        // Task 4: Fetch filtered gifts using the find(query) method
-        const gifts = await collection.find(query).toArray() // Use await to fetch results and convert them to an array
+        // Task 6: Log the constructed query
+        logger.info('Executing query:', query);
 
-        res.json(gifts)
-    } catch (e) {
-        next(e)
+        // Task 7: Fetch filtered items using the find(query) method
+        const items = await collection.find(query).toArray();
+        logger.info(`Found ${items.length} items matching the query`);
+
+        // Task 8: Return the items as JSON
+        res.json(items);
+    } catch (error) {
+        logger.error('Search Route Error:', error);
+        res.status(500).json({ message: 'Internal server error' });
     }
-})
+});
 
-module.exports = router
+module.exports = router;
